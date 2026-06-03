@@ -143,28 +143,30 @@ class _CalculatorPageState extends State<CalculatorPage> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            SwitchListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Use plastic thickness'),
-                              subtitle: Text(
-                                _includePlasticThickness
-                                    ? 'Plastic thickness is included in the formula'
-                                    : 'Plastic thickness is turned off',
-                              ),
-                              value: _includePlasticThickness,
-                              onChanged: (value) {
-                                setState(() {
-                                  _includePlasticThickness = value;
-                                });
-                                _calculate();
-                              },
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Does the coil have plastic film?',
+                                  ),
+                                ),
+                                _YesNoSwitch(
+                                  value: _includePlasticThickness,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _includePlasticThickness = value;
+                                    });
+                                    _calculate();
+                                  },
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 16),
                             Row(
                               children: [
                                 Expanded(
                                   child: _ConstantTile(
-                                    label: 'Plastic thickness',
+                                    label: 'Plastic Film',
                                     value:
                                         (_includePlasticThickness
                                                 ? AppConstants.plasticThickness
@@ -175,7 +177,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _ConstantTile(
-                                    label: 'Air gap',
+                                    label: 'Air Gap',
                                     value: AppConstants.airGap.toStringAsFixed(
                                       2,
                                     ),
@@ -274,7 +276,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Version 1 keeps the calculator local and does not require login. Future versions can add save history, authentication, and synced records.',
+                      'Version 1 - Coilculator',
                       textAlign: TextAlign.center,
                       style: Theme.of(
                         context,
@@ -365,6 +367,66 @@ class _ConstantTile extends StatelessWidget {
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _YesNoSwitch extends StatelessWidget {
+  const _YesNoSwitch({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      toggled: value,
+      button: true,
+      label: value ? 'Yes' : 'No',
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        borderRadius: BorderRadius.circular(999),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          width: 112,
+          height: 44,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: value ? colorScheme.primary : colorScheme.outlineVariant,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: AnimatedAlign(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              width: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                value ? 'Yes' : 'No',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: value ? colorScheme.primary : colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
