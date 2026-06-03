@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/models/coil_length_result.dart';
@@ -15,8 +16,12 @@ class _CalculatorPageState extends State<CalculatorPage> {
   final TextEditingController _thicknessLeftController = TextEditingController(
     text: '60',
   );
+  final TextEditingController _coilIdController = TextEditingController(
+    text: AppConstants.coilId.toStringAsFixed(0),
+  );
 
   double _selectedSteelThickness = AppConstants.steelThicknessOptions[2];
+  bool _includePlasticThickness = true;
   CoilLengthResult? _result;
   String? _errorText;
 
@@ -29,11 +34,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
   @override
   void dispose() {
     _thicknessLeftController.dispose();
+    _coilIdController.dispose();
     super.dispose();
   }
 
   void _calculate() {
     final thicknessLeft = double.tryParse(_thicknessLeftController.text.trim());
+    final coilId = double.tryParse(_coilIdController.text.trim());
 
     if (thicknessLeft == null || thicknessLeft <= 0) {
       setState(() {
@@ -43,10 +50,20 @@ class _CalculatorPageState extends State<CalculatorPage> {
       return;
     }
 
+    if (coilId == null || coilId <= 0) {
+      setState(() {
+        _result = null;
+        _errorText = 'Enter a valid coil I.D. value.';
+      });
+      return;
+    }
+
     setState(() {
       _result = CoilLengthCalculator.calculate(
         thicknessLeftOnCoil: thicknessLeft,
         steelThickness: _selectedSteelThickness,
+        coilId: coilId,
+        includePlasticThickness: _includePlasticThickness,
       );
       _errorText = null;
     });
@@ -126,13 +143,33 @@ class _CalculatorPageState extends State<CalculatorPage> {
                               },
                             ),
                             const SizedBox(height: 16),
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Use plastic thickness'),
+                              subtitle: Text(
+                                _includePlasticThickness
+                                    ? 'Plastic thickness is included in the formula'
+                                    : 'Plastic thickness is turned off',
+                              ),
+                              value: _includePlasticThickness,
+                              onChanged: (value) {
+                                setState(() {
+                                  _includePlasticThickness = value;
+                                });
+                                _calculate();
+                              },
+                            ),
+                            const SizedBox(height: 16),
                             Row(
                               children: [
                                 Expanded(
                                   child: _ConstantTile(
                                     label: 'Plastic thickness',
-                                    value: AppConstants.plasticThickness
-                                        .toStringAsFixed(2),
+                                    value:
+                                        (_includePlasticThickness
+                                                ? AppConstants.plasticThickness
+                                                : 0)
+                                            .toStringAsFixed(2),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -146,10 +183,18 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            _ConstantTile(
-                              label: 'Coil I.D. (mm)',
-                              value: AppConstants.coilId.toStringAsFixed(0),
+                            const SizedBox(height: 20),
+                            TextField(
+                              controller: _coilIdController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: const InputDecoration(
+                                labelText: 'Coil I.D. (mm)',
+                                hintText: 'Enter coil I.D.',
+                              ),
+                              onChanged: (_) => _calculate(),
                             ),
                             const SizedBox(height: 20),
                             // FilledButton.icon(

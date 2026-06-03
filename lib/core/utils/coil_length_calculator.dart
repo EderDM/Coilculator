@@ -9,9 +9,15 @@ class CoilLengthCalculator {
   static CoilLengthResult calculate({
     required double thicknessLeftOnCoil,
     required double steelThickness,
+    required double coilId,
+    bool includePlasticThickness = true,
   }) {
+    final plasticThickness = includePlasticThickness
+        ? AppConstants.plasticThickness
+        : 0;
+
     final totalThickness =
-        steelThickness + AppConstants.plasticThickness + AppConstants.airGap;
+        steelThickness + plasticThickness + AppConstants.airGap;
 
     if (totalThickness <= 0) {
       return const CoilLengthResult(
@@ -22,8 +28,7 @@ class CoilLengthCalculator {
       );
     }
 
-    final subTotal =
-        (thicknessLeftOnCoil / totalThickness) * AppConstants.coilId;
+    final subTotal = (thicknessLeftOnCoil / totalThickness) * coilId;
     final estimatedLengthMillimeters = subTotal * pi;
     final estimatedLengthMeters = estimatedLengthMillimeters / 1000;
 
