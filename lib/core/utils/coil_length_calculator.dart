@@ -10,14 +10,14 @@ class CoilLengthCalculator {
     required double thicknessLeftOnCoil,
     required double steelThickness,
     required double coilId,
+    required double airGap,
     bool includePlasticThickness = true,
   }) {
     final plasticThickness = includePlasticThickness
         ? AppConstants.plasticThickness
         : 0;
 
-    final totalThickness =
-        steelThickness + plasticThickness + AppConstants.airGap;
+    final totalThickness = steelThickness + plasticThickness + airGap;
 
     if (totalThickness <= 0) {
       return const CoilLengthResult(

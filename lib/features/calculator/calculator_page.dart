@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/models/coil_length_result.dart';
@@ -21,6 +20,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   );
 
   double _selectedSteelThickness = AppConstants.steelThicknessOptions[2];
+  double _selectedAirGap = AppConstants.airGapOptions[0];
   bool _includePlasticThickness = true;
   CoilLengthResult? _result;
   String? _errorText;
@@ -63,6 +63,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
         thicknessLeftOnCoil: thicknessLeft,
         steelThickness: _selectedSteelThickness,
         coilId: coilId,
+        airGap: _selectedAirGap,
         includePlasticThickness: _includePlasticThickness,
       );
       _errorText = null;
@@ -142,6 +143,45 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                 _calculate();
                               },
                             ),
+                            const SizedBox(height: 20),
+                            DropdownButtonFormField<double>(
+                              value: _selectedAirGap,
+                              menuMaxHeight: 280,
+                              decoration: const InputDecoration(
+                                labelText: 'Air gap (mm)',
+                              ),
+                              items: AppConstants.airGapOptions
+                                  .map(
+                                    (value) => DropdownMenuItem<double>(
+                                      value: value,
+                                      child: Text(value.toStringAsFixed(2)),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value == null) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  _selectedAirGap = value;
+                                });
+                                _calculate();
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            TextField(
+                              controller: _coilIdController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: const InputDecoration(
+                                labelText: 'Coil I.D. (mm)',
+                                hintText: 'Enter coil I.D.',
+                              ),
+                              onChanged: (_) => _calculate(),
+                            ),
                             const SizedBox(height: 16),
                             Row(
                               children: [
@@ -162,41 +202,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _ConstantTile(
-                                    label: 'Plastic Film',
-                                    value:
-                                        (_includePlasticThickness
-                                                ? AppConstants.plasticThickness
-                                                : 0)
-                                            .toStringAsFixed(2),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _ConstantTile(
-                                    label: 'Air Gap',
-                                    value: AppConstants.airGap.toStringAsFixed(
-                                      2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            TextField(
-                              controller: _coilIdController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: const InputDecoration(
-                                labelText: 'Coil I.D. (mm)',
-                                hintText: 'Enter coil I.D.',
-                              ),
-                              onChanged: (_) => _calculate(),
+                            _ConstantTile(
+                              label: 'Plastic Film',
+                              value:
+                                  (_includePlasticThickness
+                                          ? AppConstants.plasticThickness
+                                          : 0)
+                                      .toStringAsFixed(2),
                             ),
                             const SizedBox(height: 20),
                             // FilledButton.icon(
